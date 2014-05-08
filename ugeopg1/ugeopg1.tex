@@ -1,12 +1,24 @@
-%!TEX TS-program = xelatex
-%!TEX encoding = UTF-8 Unicode
-
 \documentclass[paper=a4, fleqn]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{xspace}
 \usepackage{relsize}
 \usepackage{amsmath}
 \usepackage{url}
+\usepackage{listings}
+\usepackage{booktabs}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  commentstyle=\color{webgreen}\ttfamily,
+  numbers=left,
+  numberstyle=\ttfamily\scriptsize,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=tb,
+  framerule=\heavyrulewidth, % defined in the booktabs package
+  belowcaptionskip=.75\baselineskip
+}
 
 \newcommand{\clrs}{\textsmaller{CLRS}\xspace}
 
@@ -118,31 +130,104 @@ Ikke udført.
 
 \section*{Task 3}
 
-Ikke udført.
+We assume zero-based indexing in the following pseudo-code.
+
+\begin{lstlisting}
+INTROSORT(A)
+  INTROSORTLOOP(A, 0, A.length, 2*lg(A.length), 16)
+\end{lstlisting}
+
+\begin{lstlisting}
+INTROSORTLOOP(A, p, r, maxdepth, threshold)
+  if (r - p) < threshold then
+    return INSERTIONSORT(A, p, r)
+  if maxdepth == 0 then
+    return HEAPSORT(A, p, r)
+  maxdepth = maxdepth - 1
+  pivot = MEDIAN(A, p, (p + r) / 2, r)
+  pi = PARTITION(A, p, r, pivot)
+  INTROSORTLOOP(A, p, pi-1, maxdepth, threshold)
+  INTROSORTLOOP(A, pi+1, r, maxdepth, threshold)
+\end{lstlisting}
+
+\begin{lstlisting}
+MEDIAN(A, p, q, r)
+  if A[q] < A[p] then
+    if A[r] < A[q] then
+      return A[q]
+    else
+      if A[r] < A[p] then
+        return A[r]
+      else 
+        return A[p]
+  else
+    if A[r] < A[q] then
+      if A[r] < A[p] then
+        return A[p]
+      else
+        return A[r]
+    else
+      return A[q]
+\end{lstlisting}
+
+\begin{lstlisting}
+PARTITION(A, p, r, pivot)
+  i = p
+  exchange A[r] with A[pivot]
+  for p upto r
+    if A[p] <= A[r] then
+      exhange A[i] with A[p]
+      i = i + 1
+    p = p + 1
+  return i - 1
+\end{lstlisting}
+
+\begin{lstlisting}
+INSERTIONSORT(A, p, r)
+  for j = p + 1 to r
+    key  = A[j]
+    //insert A[j] into the sorted sequence A[0 .. j -1]
+    i = j - 1
+    while i >= 0 and A[i] > key
+      A[i + 1] = A[i]
+      i = i - 1
+    A[i + 1] = key
+\end{lstlisting}
+
+\begin{lstlisting}
+HEAPSORT(A, p, r)
+  BUILD-MAX-HEAP(A)
+  for r downto p
+    exchange A[p] with A[i]
+    p = p - 1
+    MAX-HEAPIFY(A, p, r)
+\end{lstlisting}
 
 \section*{Task 4}
 
-Ikke udført.
+Introsort starts out as a regular quicksort, and if things go well switches to
+insertion sort when the remaining input is small and nearly sorted (a property
+of quicksort). If the data is distributed in a way that yields an excessive
+number of splits in the quicksort stage, the algorithm switches to heap sort
+with a worst-case running time of $n\log n$.
+
+Because the algorithm switches to heap sort after no more than a constant factor
+of $\log n$ extraneous recursions, the combined worst-case running time is the
+same as that of heap sort, $n\log n$.
 
 \section*{Task 5}
 
-Fordi heap-sort arbejder {\em in-place}. Mergesort har f.eks. N ekstra plads i
-worst case (se evt skema \url{http://en.wikipedia.org/wiki/Sorting_algorithm})
+Heap sort works in-place, whereas for instance merge sort uses $n$ additional
+slots in the worst case (\url{http://en.wikipedia.org/wiki/Sorting_algorithm}).
 
 \section*{Task 6}
 
-In the case that the array is fully sorted, only $n-1$ comparisons have to be
-made, which gives insertion sort a best-case runtime of $O(n)$. Both the average
-and worst case of insertion sort are $O(n^2)$, but since introsort only switches
-to insertion sort when a certain level of deepness is reached, those cases can
-be avoided. Insertion sort works with low overhead, and is exceptional at
-sorting very small lists (typically with less than 20 elements (evt reference?))
-or nearly sorted lists.
-
-\paragraph{}
-
-Vi fik først sent etableret en afleveringsgruppe og har derfor ikke fået lavet
-så meget af den første opgave. Vi håber derfor på at få mulighed for at lave en
-genaflevering.
+In the case that the array is sorted, only $n-1$ comparisons have to be made,
+which gives insertion sort a best-case runtime of $O(n)$. Both the average and
+worst case of insertion sort are $O(n^2)$, but one of insertion-sorts properties
+is that it's adaptive, and thus performs significantly faster on already sorted
+input. Since introsort only switches to insertion sort when a certain level of
+deepness is reached, those cases can be avoided. Insertion sort works with low
+overhead, and is exceptional at sorting very small lists or nearly sorted lists.
 
 \end{document}
