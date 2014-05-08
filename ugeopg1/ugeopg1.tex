@@ -102,11 +102,11 @@ p(n) &= p(\lceil n/2\rceil)+p(\lceil n/3\rceil)+n \\
      &\geq c(n/2)\lg(n/2) + c(n/3)\lg(n/3) + n \\
      &= c(n/2)\lg n - c(n/2)\lg 2 + c(n/3)\lg n - c(n/3)\lg 3 + n \\
      &= (5/6)cn\lg n - cn(1/2 + \lg(3)/3) + n \\
-     &\geq dn\lg n - dn + n,\quad\mathrm{hvor}\,d<(5/6)c \\
-     &\geq dn\lg n,\quad\mathrm{hvor}\,d<1
+     &\geq (5/6)cn\lg n,\quad c < 1/2 + \lg(3)/3 = 1.0283 \\
+     &= c'n\lg n,\quad\qquad c' < (5/6)\cdot 1.0283 = 0.8569 \\
 \end{align*}
 
-Fungerer ikke rigtigt ...
+Så ved at vælge f.eks.\ $c=5/6$ opnås det ønskede resultat.
 
 \subsection*{$p(n)=\sqrt{n}+p(\sqrt{n})+\sqrt{n}$}
 
