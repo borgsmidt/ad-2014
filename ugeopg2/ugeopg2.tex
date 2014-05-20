@@ -1,0 +1,141 @@
+\documentclass[paper=a4, fleqn]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{xspace}
+\usepackage{relsize}
+\usepackage{amsmath}
+\usepackage{microtype}
+\usepackage{url}
+\usepackage{listings}
+\usepackage{booktabs}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  commentstyle=\color{webgreen}\ttfamily,
+  numbers=left,
+  numberstyle=\ttfamily\scriptsize,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=tb,
+  framerule=\heavyrulewidth, % defined in the booktabs package
+  belowcaptionskip=.75\baselineskip
+}
+
+\newcommand{\clrs}{\textsmaller{CLRS}\xspace}
+
+\title{Ugeopgave 2}
+\author{Mathias Bramming \and Philip Meulengracht \and Rasmus Borgsmidt}
+\date{}
+
+\begin{document}
+\maketitle
+\section*{Task 1}
+
+\subsection*{Optimal Substructure}
+
+The problem exhibits optimal substructure because any optimal solution to a
+problem of size $n>0$ contains within it optimal solutions to subproblems. If
+for example we consider a sequence of $n$ heights $\{h_1,\ldots,h_n\}$, an
+optimal solution $s$, can be obtained by adding to optimal solutions
+$s'=\{s'_1,\ldots,s'_p\}$ and $s''=\{s''_1,\ldots,s''_q\}$, $p,q\leq n-1$,for the
+smaller sequence $\{h_1,\ldots,h_{n-1}\}$:
+\[
+s = \left\{
+  \begin{array}{l l}
+    \{s'_1,\ldots,s'_p, h_n\}& \quad \text{$s'_p<h_n$ and $s'_{p-1}>s'_p$}\\
+    \{s''_1,\ldots,s''_p, h_n\}& \quad \text{$s''_p>h_n$ and $s''_{p-1}<s''_p$}\\
+    s' & \quad \text{otherwise}
+  \end{array} \right.
+\]
+In the event that both $s'$ and $s''$ exist to satisfy the two first clauses
+above, either result will be an optimal solution. If $n=0$, the empty
+subsequence is the only optimal solution.
+
+\subsection*{Overlapping Subproblems}
+
+The problem exhibits overlapping subproblems because for each iteration, we need
+to consider multiple optimal solutions for each subproblem. Therefore unless
+information for these is retained, the algorithm will need to solve the same
+subproblem more than once.
+
+\clearpage
+\section*{Task 2}
+
+The length of a longest zig-zag subsequence of $\{h_1,\ldots,h_n\}$ with largest
+element $m=\max\limits_{1\leq k\leq n}(h_k)$ can be described by the following
+recursive definition:
+\begin{align*}
+  l_n &= \max(u_{[n,1]}, d_{[n,m]})\\[12pt]
+u_{[n, j]} &= \left\{
+  \begin{array}{l l}
+    0& \quad \text{$n=0$}\\
+    \max(u_{[n-1,j]}, 1+d_{[n-1,h_n]})& \quad\text{$n>0$ and $j<h_n$}\\
+    u_{[n-1,j]}& \quad\text{otherwise}
+  \end{array} \right.\\[12pt]
+d_{[n, j]} &= \left\{
+  \begin{array}{l l}
+    0& \quad \text{$n=0$}\\
+    \max(d_{[n-1,j]}, 1+u_{[n-1,h_n]})& \quad\text{$n>0$ and $j>h_n$}\\
+    d_{[n-1,j]}& \quad\text{otherwise}
+  \end{array} \right.
+\end{align*}
+In this definition, each $u_{[n,j]}$ denotes the length of a longest subsequence
+`zigging' up to a value $v>j$, and each $d_{[n,j]}$ denotes the
+length of a longest subsequence `zagging' down to a value $v<j$.
+
+\section*{Task 3}
+
+We prove the correctness of the algorithm using mathematical induction over $n$.
+
+The base case is $n=0$, the empty sequence of bottles. For this sequence, any
+subsequence is trivially empty and therefore identical to the full
+sequence. This makes the empty sequence an optimal solution to the problem for
+$n=0$.
+
+Turning to the inductive step, we assume that the definitions presented in the
+answer to Task 2 of $u_{[n-1, j]}$ and $d_{[n-1, j]}$ hold for $n>0$ and $1\leq
+j\leq m$.
+
+Looking at the definition of $u_{[n, j]}$, we recognize two possible cases: If
+$j<h_n$, we have $u_{[n, j]}=\max(u_{[n-1,j]}, 1+d_{[n-1,h_n]})$. This is
+correct since $u_{[n, j]}$ denotes the length of a longest subsequence zigging
+up to a value $v>j$; either this subsequence already zigged up to $v$ earlier in
+the sequence than $n$, or it zagged down to a value $v'<j$, in which case adding
+$h_n$ to the subsequence increases its length by $1$. If $j\geq h_n$, $h_n$
+cannot contribute to the subsequence and we get $u_{[n, j]}=u_{[n-1, j]}$.
+
+Similarly looking at the definition of $d_{[n, j]}$, we recognize two possible
+cases: If $j>h_n$, we have $d_{[n, j]}=\max(d_{[n-1,j]},
+1+u_{[n-1,h_n]})$. Again this is correct since $d_{[n, j]}$ denotes the length
+of a longest subsequence `zagging' down to a value $v<j$; either this
+subsequence already zagged down to $v$ earlier in the sequence than $n$, or it
+zigged up to a value $v'>j$, in which case adding $h_n$ to the subsequence
+increases its length by $1$. If $j\leq h_n$, $h_n$ cannot contribute and we get
+$d_{[n, j]}=d_{[n-1, j]}$.
+
+This concludes the inductive step, and by the principles of mathematical
+induction we have shown the correctness of $u_{[n, j]}$ and $d_{[n, j]}$ for
+$n>0$ and $1\leq j\leq m$. Given that $u_{[n, 1]}$ denotes the length of a
+longest subsequence zigging up to a value $v>1$ and that $d_{[n, m]}$ denotes
+the length of a longest subsequence zagging down to a value $v'<m$, an optimal
+solution has to be one or both of them. Therefore $l_n$ as defined in the answer
+to Task 2 is also correct.
+
+\section*{Task 4}
+
+\subsection*{Running Time}
+
+
+
+\subsection*{Memory Usage}
+
+
+We will prove the running time and memory usage of the algorithm by analyzing
+the recursive steps required and by making assumptions about which subsolutions
+are stored for later retrieval.
+
+\section*{Task 5}
+
+Still to do.
+
+\end{document}
