@@ -69,13 +69,17 @@ recursive definition:
 u_{[n, j]} &= \left\{
   \begin{array}{l l}
     0& \quad \text{$n=0$}\\
-    \max(u_{[n-1,j]}, 1+d_{[n-1,h_n]})& \quad\text{$n>0$ and $j<h_n$}\\
+    \max\left(u_{[n-1,j]}, 1+d_{[n-1,h_n]}, \max\limits_{j<k\leq
+        m}(u_{[n,k]})\right)&
+    \quad\text{$n>0$ and $j<h_n$}\\
     u_{[n-1,j]}& \quad\text{otherwise}
   \end{array} \right.\\[12pt]
 d_{[n, j]} &= \left\{
   \begin{array}{l l}
     0& \quad \text{$n=0$}\\
-    \max(d_{[n-1,j]}, 1+u_{[n-1,h_n]})& \quad\text{$n>0$ and $j>h_n$}\\
+    \max\left(d_{[n-1,j]}, 1+u_{[n-1,h_n]}, \max\limits_{1\leq
+        k<j}(d_{[n,k]})\right)&
+    \quad\text{$n>0$ and $j>h_n$}\\
     d_{[n-1,j]}& \quad\text{otherwise}
   \end{array} \right.
 \end{align*}
@@ -97,29 +101,32 @@ answer to Task 2 of $u_{[n-1, j]}$ and $d_{[n-1, j]}$ hold for $n>0$ and $1\leq
 j\leq m$.
 
 Looking at the definition of $u_{[n, j]}$, we recognize two possible cases: If
-$j<h_n$, we have $u_{[n, j]}=\max(u_{[n-1,j]}, 1+d_{[n-1,h_n]})$. This is
-correct since $u_{[n, j]}$ denotes the length of a longest subsequence zigging
-up to a value $v>j$; either this subsequence already zigged up to $v$ earlier in
-the sequence than $n$, or it zagged down to a value $v'<j$, in which case adding
-$h_n$ to the subsequence increases its length by $1$. If $j\geq h_n$, $h_n$
-cannot contribute to the subsequence and we get $u_{[n, j]}=u_{[n-1, j]}$.
+$j<h_n$, we have $u_{[n, j]}=\max(u_{[n-1,j]}, 1+d_{[n-1,h_n]}, \max_{j<k\leq
+  m}(u_{[n,k]}))$. This is correct since $u_{[n, j]}$ denotes the length of a
+longest subsequence zigging up to a value $v>j$; either this subsequence already
+zigged up to $v$ earlier in the sequence than $n$, or it zagged down to a value
+$v'<j$, in which case adding $h_n$ to the subsequence increases its length by
+$1$, or it is produced by one of the $u_{[n, j']}$, where $j'>j$. If $j\geq
+h_n$, $h_n$ cannot usefully contribute to the subsequence and we get $u_{[n,
+  j]}=u_{[n-1, j]}$.
 
 Similarly looking at the definition of $d_{[n, j]}$, we recognize two possible
-cases: If $j>h_n$, we have $d_{[n, j]}=\max(d_{[n-1,j]},
-1+u_{[n-1,h_n]})$. Again this is correct since $d_{[n, j]}$ denotes the length
-of a longest subsequence `zagging' down to a value $v<j$; either this
+cases: If $j>h_n$, we have $d_{[n, j]}=\max(d_{[n-1,j]}, 1+u_{[n-1,h_n]},
+\max_{1\leq k<j}(d_{[n,k]})))$. Again this is correct since $d_{[n, j]}$ denotes
+the length of a longest subsequence `zagging' down to a value $v<j$; either this
 subsequence already zagged down to $v$ earlier in the sequence than $n$, or it
 zigged up to a value $v'>j$, in which case adding $h_n$ to the subsequence
-increases its length by $1$. If $j\leq h_n$, $h_n$ cannot contribute and we get
-$d_{[n, j]}=d_{[n-1, j]}$.
+increases its length by $1$, or it is produced by one of the $d_{[n, j']}$,
+where $j'<j$. If $j\leq h_n$, $h_n$ cannot contribute and we get $d_{[n,
+  j]}=d_{[n-1, j]}$.
 
 This concludes the inductive step, and by the principles of mathematical
 induction we have shown the correctness of $u_{[n, j]}$ and $d_{[n, j]}$ for
-$n>0$ and $1\leq j\leq m$. Given that $u_{[n, 1]}$ denotes the length of a
+$n\geq 0$ and $1\leq j\leq m$. Given that $u_{[n, 1]}$ denotes the length of a
 longest subsequence zigging up to a value $v>1$ and that $d_{[n, m]}$ denotes
 the length of a longest subsequence zagging down to a value $v'<m$, an optimal
-solution has to be one or both of them. Therefore $l_n$ as defined in the answer
-to Task 2 is also correct.
+solution has to be found by one or both of them. Therefore $l_n$ as defined in
+the answer to Task 2 is also correct.
 
 \section*{Task 4}
 
