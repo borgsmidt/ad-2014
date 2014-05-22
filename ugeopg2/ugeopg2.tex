@@ -132,14 +132,34 @@ the answer to Task 2 is also correct.
 
 \subsection*{Running Time}
 
+The $\max$ operation in definition $l_n$ itself takes $\Theta(1)$ time. And if
+$n=0$, both $u_{[n,j]}$ and $d_{[n,j]}$ are also $\Theta(1)$. So in this case
+the running time $T(n)=\Theta(1)$.
 
+Now let $T_u(n)$ be the running time of $u_{[n,j]}$ and $T_d(n)$ be that of
+$d_{[n,j]}$. When $n>0$, $u_{[n,j]}$ takes $\Theta(1)$ time for the outer $\max$
+operation, $T_u(n-1)$ time for the first term, and $1+T_d(n-1)$ time for the
+second term. Looking at the two first terms, we see that for each recursion $n$
+is decreased by $1$. Therefore the running time for each of these is
+$\Theta(n)$. The running time of the last term is $(m-j)T_u(n)$, which means we
+get a total of $m-j+1$ times the running costs embedded in $u_{[n,j]}$, that is
+$T_u(n)=(m-j+1)(\Theta(1) + \Theta(n) + \Theta(n)) = \Theta(mn)$.
+
+By the same argument, we get $T_d(n)=\Theta(mn)$. And putting it all together:
+\[
+T(n) = \left\{
+  \begin{array}{l l}
+    \Theta(1)& \quad \text{$n=0$}\\
+    \Theta(1)
++ \Theta(mn) + \Theta(mn) = \Theta(mn) &\quad\text{$n>0$}
+\end{array}\right.
+\]
 
 \subsection*{Memory Usage}
 
-
-We will prove the running time and memory usage of the algorithm by analyzing
-the recursive steps required and by making assumptions about which subsolutions
-are stored for later retrieval.
+A simple implementation of this algorithm could store the calculated values for
+$u_{[n,j]}$ and $d_{[n,j]}$, respectively, in two $(n\times m)$-tables and use
+these for lookups. This would make the memory usage $\Theta(mn)$.
 
 \section*{Task 5}
 
