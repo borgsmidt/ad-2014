@@ -58,5 +58,23 @@ CHECK-SUPPLY(b', P, B)
 \end{lstlisting}
 
 \section*{Task 2}
+
+\clearpage
 \section*{Task 3}
+
+\begin{lstlisting}
+MAX-SUPPLY(P, B)
+  limit = max value in B       // runs in O(B)
+  b' = round(limit / 2)
+  while true
+    if CHECK-SUPPLY(b', P, B)
+      if b' == limit
+        return b'
+      else
+        b' = round(b' + (limit - b') / 2)
+    else
+      limit = b'
+      b' = round(limit / 2)
+\end{lstlisting}
+
 \end{document}
