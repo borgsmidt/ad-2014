@@ -1,0 +1,62 @@
+\documentclass[paper=a4, fleqn]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{xspace}
+\usepackage{relsize}
+\usepackage{amsmath}
+\usepackage{microtype}
+\usepackage{url}
+\usepackage{listings}
+\usepackage{booktabs}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  commentstyle=\color{webgreen}\ttfamily,
+  numbers=left,
+  numberstyle=\ttfamily\scriptsize,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  frame=tb,
+  framerule=\heavyrulewidth, % defined in the booktabs package
+  belowcaptionskip=.75\baselineskip
+}
+
+\newcommand{\clrs}{\textsmaller{CLRS}\xspace}
+
+\title{Ugeopgave 3}
+\author{Mathias Bramming \and Philip Meulengracht \and Rasmus Borgsmidt}
+\date{}
+
+\begin{document}
+\maketitle
+\section*{Task 1}
+
+\begin{lstlisting}
+CHECK-SUPPLY(b', P, B)
+  let M and F be empty lists
+
+  for i = 1 to length of B
+    if B[i] < b'
+      F = [i | F]
+    else if B[i] > b'
+      M = [i | M]
+
+  for each m in M
+    if F is empty
+      return true
+    else
+      f = head(F)
+      dist = abs(P[m] - P[f])
+      surplus = B[m] - b'
+      demand = b' - B[f]
+      cost = 2 * dist
+      load = min(surplus, demand + cost)
+      B[m] = B[m] - load
+      B[f] = B[f] + load - cost
+      if B[f] >= b'
+        F = tail(F)
+\end{lstlisting}
+
+\section*{Task 2}
+\section*{Task 3}
+\end{document}
