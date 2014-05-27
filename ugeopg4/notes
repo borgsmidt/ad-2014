@@ -1,0 +1,99 @@
+;; This buffer is for notes you don't want to save, and for Lisp evaluation.
+;; If you want to create a file, visit that file with C-x C-f,
+;; then enter the text in that file's own buffer.
+
+LONGEST(b, h, n)
+  return 0 if n == 0
+  q = neg_inf
+  for i = 1 to n
+    q = max(q, 
+
+
+
+
+
+
+d = [6, -5, 6, 0, -5, 2, 3]
+
+LONGEST(up, down)
+  for i = 1 to n
+    for j = 1 to m
+      if h[i] > j
+        up[i, j] = 1 + down[i-1, h[i]]
+      else if h[i] < j
+        down[i, j] = 1 + up[i-1, h[i]]
+
+
+n - up
+
+6 |  0  0  0  0  0  0  0
+1 |  0  0  0  0  0  0  0
+7 |  0  0  0  0  0  0  0
+7 |  0  0  0  0  0  0  0
+2 |  1  0  0  0  0  0  0
+4 |  1  1  1  0  0  0  0
+7 |  1  1  1  1  1  1  0
+  +---------------------
+     1  2  3  4  5  6  7  m
+
+
+
+n - down
+
+6 |  0  0  0  0  0  0  0
+1 |  0  0  0  0  0  0  0
+7 |  0  0  0  0  0  0  0
+7 |  0  0  0  0  0  0  0
+2 |  0  0  0  0  0  0  0
+4 |  0  0  0  0  2  2  1
+7 |  0  0  0  0  0  0  0
+  +---------------------
+     1  2  3  4  5  6  7  m
+
+
+
+
+\begin{align*}
+  l_n &= \max\left(\max\limits_{1\leq j\leq m}(u_{[n,j]}), \max\limits_{1\leq j\leq m}(d_{[n,j]})\right)\\[12pt]
+d_{[n, j]} &= \left\{
+  \begin{array}{l l}
+    0& \quad \text{$n=0$}\\
+    d_{[n-1,j]}& \quad\text{$n>0$ and $j\neq h_n$}\\[6pt]
+    \max\left(\max\limits_{j<k\leq m}(1+u_{[n-1,k]}), d_{[n-1,j]}\right)& \quad
+    \text{$n>0$ and $j=h_n$}\\
+  \end{array} \right.\\[12pt]
+u_{[n, j]} &= \left\{
+  \begin{array}{l l}
+    0& \quad \text{$n=0$}\\
+    u_{[n-1,j]}& \quad\text{$n>0$ and $j\neq h_n$}\\[6pt]
+    \max\left(\max\limits_{1\leq k<j}(1+d_{[n-1,k]}), u_{[n-1,j]}\right)& \quad
+    \text{$n>0$ and $j=h_n$}
+  \end{array} \right.
+\end{align*}
+
+
+
+DECREMENT(G, U)
+  let R be an empty list of root vertices
+
+  // Runs in O(m + a(n)) due to union by rank and path compression, CLRS p. 571
+  merge_count = 0
+  for each link (u, v) in G.E
+    if not QUERY(u, v)
+      increment merge_count
+
+  comp_count = n - merge_count
+
+  // Runs in O(m + a(n)) due to union by rank and path compression, CLRS p. 571
+  for each unlink (u, v) in U
+    UNLINK(FIND-SET(u), FIND-SET(v))
+    if not QUERY(u, v)
+      increment comp_count
+    print comp_count
+
+QUERY(u, v)
+  FIND-SET(u) == FIND-SET(v)
+
+UNLINK(r1, r2)
+  r1.p = r1
+  r2.p = r2
