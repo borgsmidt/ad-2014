@@ -31,7 +31,7 @@
 \maketitle
 \section*{Task 1} 
 
-We use a disjoint-set forest, identical to the one described in CLRS section
+We use a disjoint-set forest, identical to the one described in \clrs section
 21.3, e.g. a tree structure using \emph{union by rank} and \emph{path
   compression}. The {\tt LINK} operation, works by finding the root of each set,
 and appending the tree with the smallest rank, to the biggest. In case the roots
@@ -58,7 +58,7 @@ QUERY(i,j)
 	return FIND-SET(i) == FIND-SET(j)
 \end{lstlisting}
 
-We use the {\tt FIND-SET} operation from CLRS (two-pass method) as a helper
+We use the {\tt FIND-SET} operation from \clrs (two-pass method) as a helper
 function to find the root of a given node:
 
 \begin{lstlisting}
@@ -68,7 +68,7 @@ FIND-SET(x)
 	return x.p
 \end{lstlisting}
 
-According to CLRS, \emph{Union by rank} has a tight running-time bound of $O(m
+According to \clrs, \emph{Union by rank} has a tight running-time bound of $O(m
 \lg n)$, which means that our {\tt LINK} operation has the same running
 time. The running time of {\tt QUERY} has a best case of $O(1)$ and a worst
 case running time of $O(n)$: The first time the operation is used, it's possible
@@ -78,19 +78,32 @@ the root.
 
 \section*{Task 2}
 
+In order to solve this task, we extend the data structure from Task 1. Each
+vertex gets two new boolean fields, {\em marked} and {\em linked}, used to count
+the number of components in the supplied graph. These fields can obviously be
+set and cleared in $\Theta(1)$ time.
+
 \begin{lstlisting}
 DECREMENT(G, U)
-  // Runs in O(m + a(n)) due to union by rank and path compression, CLRS p. 571
+  // Runs in O(m a(n)) due to union by rank and path compression, CLRS p. 571
   comp_count = COUNT-COMPONENTS(G)
 
-  // Runs in O(m + a(n)) due to union by rank and path compression, CLRS p. 571
+  // Runs in O(m a(n)) due to union by rank and path compression, CLRS p. 571
   for each unlink (u, v) in U
     UNLINK(FIND-SET(u), FIND-SET(v))
     if not QUERY(u, v)
       increment comp_count
     print comp_count
 \end{lstlisting}
+{\tt DECREMENT} itself is very simple. It merely determines the number of
+components in the supplied graph using a helper function, {\tt
+  COUNT-COMPONENTS}, then applies each of the specified unlink operations. After
+breaking each connection, the {\tt QUERY} function from Task 1 is used to check
+if the break caused a component split and the component count should be
+incremented. After that, simply printing the count yields the desired behavior.
 
+The {\tt COUNT-COMPONENTS} function below uses the new fields to count the
+number of components in $\Theta(m\alpha(n))$ time.
 \begin{lstlisting}
 COUNT-COMPONENTS(G)
   let R be an empty list of root vertices
@@ -120,21 +133,132 @@ COUNT-COMPONENTS(G)
       increment linked_count
       v.linked = false
 
-  return n - linked_count + root_count
+  return G.n - linked_count + root_count
 \end{lstlisting}
+The counting is calculated by determining three factors:
+\begin{enumerate}
+\item The total number of breweries $n$, which can be read directly from the
+  supplied graph.
+\item The number of breweries $k$ linked to one or more other breweries. There
+  can be at most $2m$ such breweries, where $m$ is the total number of links.
+\item The number of components $r$ that the $k$ breweries are divided into.
+\end{enumerate}
+With this information at hand, the number of components in the graph can be
+calculated as $n-k+r$ because $n$ is the number of components there would be if
+there were no links at all, $k$ is the number of singleton components consumed
+by links, and $r$ is the number of components produced by the linking.
 
-\begin{lstlisting}
-QUERY(u, v)
-  FIND-SET(u) == FIND-SET(v)
-\end{lstlisting}
+The counting proceeds as follows; we walk the list of $m$ links, for each
+setting the {\em linked} field on both breweries. The field is boolean, so it
+does not matter if a brewery has already been involved in another link, there is
+no double-counting. We also set the {\em marked} field on the root vertex, and
+again because the field is boolean there is no double-counting. The root vertex
+is also added to a list of roots.
+
+Subsequently, we count the distinct roots by walking the list of root vertices
+built in the initial loop. For each root vertex, we increment the count if the
+{\em marked} field is set and then clear the field. This means that although
+each root vertex likely appears in the list multiple times, we count each
+distinct root only once.
+
+Finally, we count the number of linked breweries using the same technique; only
+this time, we check and clear the {\em linked} instead of the {\em marked}
+field. We don't need to keep a separate list of breweries to check as we can
+simply walk the list of $m$ links again.
 
 \begin{lstlisting}
 UNLINK(r1, r2)
   r1.p = r1
   r2.p = r2
 \end{lstlisting}
+The arguments of the {\tt UNLINK} operation must be root vertices. It simply
+sets the {\em p} field of each vertex to point to itself. One of these
+operations will be redundant but it is simpler just to set both than to check
+which one to set.
 
 \section*{Task 3}
 
+\subsection*{Correctness}
 
+The correctness of {\tt COUNT-COMPONENTS} is based on the property of any graph
+$G$ with $n$ vertices and $m$ connections, that its vertices are divided in two
+sections; $k\leq 2m$ vertices are linked together in $0\leq r\leq m$ disjoint
+sets, while $n-k\geq 0$ vertices float around, each forever lost in their own
+little singleton set. Therefore by counting the number of sets in each section
+of the graph and adding them together, we obtain the total number of disjoint
+sets in the graph.
+
+First our algorithm walks through the list of links in the graph, marking each
+vertex and their common root for later counting. If $n=0$ then consequently
+$m=0$ and the algorithm marks no vertices. The subsequent counting therefore
+correctly yields $0$ components. If $n>0$ and $m=0$, all the vertices fall in
+the singleton section of the graph. Again no vertices get marked and the
+algorithm returns the correct answer $n$. If both $n>0$ and $m>0$, at least one
+vertex gets marked as root and at least one (possibly the same one) gets marked
+as linked. Because the extra fields in each vertex are boolean, it makes no
+difference if they are set more than once. After the loop has completed, it is
+guaranteed that every vertex in the linked section of the graph has the {\em
+  linked} field set, and that every root of the linked vertices has the {\em
+  marked} field set.
+
+The next step is to count the number of roots $r$ in the linked section of the
+graph. In addition to marking vertices, the first loop of the algorithm also
+built a list of root vertices. This list has length $m$, and unless every link
+in the graph links together two otherwise unlinked vertices, there will be
+duplicates in this list. However, by walking the list and counting the number of
+vertices with the {\em marked} field set, provided we clear the field as soon as
+we count it, we can count the number of {\em distinct} root vertices in the
+list. Therefore this loop correctly calculates $r$.
+
+Then the algorithm counts the number of vertices (including roots) that fall in
+the linked section of the graph. The technique is the same as before. The first
+loop marked every vertex with a link at least once, so by walking the list of
+links again, counting the number of vertices with the {\em linked} field set,
+provided we clear the field as soon as we count it, we can count the number of
+{\em distinct} vertices in the linked section of the graph. Therefore this loop
+correctly calculates $k$.
+
+The final step of {\tt COUNT-COMPONENTS} simply returns $n-k+r$ which yields the
+correct result.
+
+Having determined the number of components in the graph, the {\tt DECREMENT}
+function itself is simple. It loops through the list of supplied unlink
+operations. If the length of this list is empty, the algorithm correctly does
+not print any output. Otherwise it prints the number of components in the graph
+after completing each {\tt UNLINK} operation. Since two linked vertices are
+known to share a common root, checking if they still share a common root after
+unlinking them is sufficient to determine if the operation resulted in two split
+components. And since any link always joins exactly two (possibly entangled)
+subcomponents, breaking a single link can never produce more than two disjoint
+parts. Therefore, simply incrementing the component count by $1$ every time the
+two roots are distinct is correct and the algorithm prints the correct result.
+
+\subsection*{Running Time}
+
+The running time of $\Theta(m\alpha(n))$ is based on the argument in \clrs, page
+571. Due to path compression, finding the root of $m$ linked vertices is nearly
+linear in $m$. It is illustrated well in figure 21.5. Asking for the root of
+{\em a} is expensive but after completing that operation, asking for any root is
+$\Theta(1)$. Therefore the running time of calling {\tt FIND-SET} on $m$ nodes
+is nearly linear in $m$.
+
+So looking at {\tt COUNT-COMPONENTS}, the first loop has $m$ iterations and
+completes in $\Theta(m\alpha(n))$ because the only non-constant-time operation
+in the loop is {\tt FIND-SET} mentioned above. The second loop has $\leq m$
+iterations, performs only constant-time operations and therefore completes in
+$\Theta(m)$ time. The last loop has $m$ iterations, performs only constant-time
+operations and therefore completes in $\Theta(m)$ time. The overall running time
+is therefore:
+\[
+\Theta(m\alpha(n))+\Theta(m)+\Theta(m)=\Theta(m\alpha(n)).
+\]
+
+\noindent To this, {\tt DECREMENT} itself adds a single loop with $\leq m$
+iterations. The call to {\tt UNLINK} is constant in time, the two calls to {\tt
+  FIND-SET} as described above is linear in $m$ over the loop as a whole and the
+same applies to the two calls to {\tt FIND-SET} hidden in {\tt QUERY}. The
+overall running time is therefore:
+\[
+\Theta(m\alpha(n))+\Theta(m\alpha(n))=\Theta(m\alpha(n)).
+\]
 \end{document}
